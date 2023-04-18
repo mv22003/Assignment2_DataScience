@@ -7,4 +7,4 @@ In this repository you will find the following:
 
 This datasets can be found [here](https://drive.google.com/drive/folders/1SlvDzPxx-vHP3nCmTyEXrUPao6pRYPcA?usp=share_link).
 
-3. feature_extraction --> Python function to preprocess the data and create a matrix to predict the empathy score using regression models.
+3. feature_extraction.py --> Python function to preprocess the data and create a matrix to predict the empathy score using regression models.
