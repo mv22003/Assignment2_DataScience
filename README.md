@@ -1,4 +1,4 @@
-# Assignment2_DataScience
+# Predicting empathy score using eye-tracker data
 In this repository you will find the following:
 
 
