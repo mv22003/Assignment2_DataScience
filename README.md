@@ -8,3 +8,4 @@ In this repository you will find the following:
 This datasets can be found [here](https://drive.google.com/drive/folders/1SlvDzPxx-vHP3nCmTyEXrUPao6pRYPcA?usp=share_link).
 
 3. feature_extraction.py --> Python function to preprocess the data and create a matrix to predict the empathy score using regression models.
+4. regression_models.ipynb --> Jupyter Notebook were we call our matrix and perform several regression models and compare them to a dummy regressor to understand the performance of each. 
