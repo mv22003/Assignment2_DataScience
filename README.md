@@ -1,4 +1,4 @@
-# Predicting empathy score using eye-tracker data
+# Predicting empathy score for employee recruitment using eye-tracker data
 In this repository you will find the following:
 
 
