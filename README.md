@@ -12,8 +12,8 @@ This three zip files were collected from the [EyeT4Empathy dataset](https://www.
 This functions are called in a jupyter notebook to create a matrix for each and store them in a csv file. The functions are the following:
   - select_group()--> Automatize choosing between test or control group when doing feature extraction
   - preprocess()----> Call the functions that perform the feature extraction of one recording
-  - label()----------> Extract labels/target from questionnaries to append to dataframe
-  - flatten()--------> Aditional function to flatten a list of list into a list (helpful in the creation of label)
+  - label()-----------> Extract labels/target from questionnaries to append to dataframe
+  - flatten()---------> Aditional function to flatten a list of list into a list (helpful in the creation of label)
 
 5. 
 
