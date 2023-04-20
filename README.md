@@ -2,9 +2,9 @@
 In this repository you will find the following:
 
 
-1. test_rawdata -----> Zip file with the raw data of 30 participants, performing gaze typing.
-2. control_rawdata --> Zip file with the raw data of 30 participants, performing free viewing.
-3. questionnaries ---> Zip file with two questionnaries before and after the task performed by the participants. This data contains the empathy scores we are predicting
+1. [test_rawdata](https://drive.google.com/drive/folders/1SlvDzPxx-vHP3nCmTyEXrUPao6pRYPcA?usp=share_link) -----> Zip file with the raw data of 30 participants, performing gaze typing.
+2. [control_rawdata](https://drive.google.com/drive/folders/1SlvDzPxx-vHP3nCmTyEXrUPao6pRYPcA?usp=share_link) --> Zip file with the raw data of 30 participants, performing free viewing.
+3. [questionnaries](https://drive.google.com/drive/folders/1SlvDzPxx-vHP3nCmTyEXrUPao6pRYPcA?usp=share_link) ---> Zip file with two questionnaries before and after the task performed by the participants. This data contains the empathy scores we are predicting
 
 This three zip files were collected from the [EyeT4Empathy dataset](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9719458/), and can be found [here](https://drive.google.com/drive/folders/1SlvDzPxx-vHP3nCmTyEXrUPao6pRYPcA?usp=share_link).
 
