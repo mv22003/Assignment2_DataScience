@@ -10,6 +10,10 @@ This three zip files were collected from the [EyeT4Empathy dataset](https://www.
 
 4. feature_extraction.py --> Python file that contains a series of functions that automatizes the feature extraction of both the control and test group of the dataset.
 This functions are called in a jupyter notebook to create a matrix for each and store them in a csv file.
+- select_group()
+- preprocess()
+- label()
+- flatten()
 
 5. 
 
