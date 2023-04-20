@@ -10,11 +10,11 @@ This three zip files were collected from the [EyeT4Empathy dataset](https://www.
 
 4. [feature_extraction.py](feature_extraction.py) --> Python file that contains a series of functions that automatizes the feature extraction of both the control and test group of the dataset.
 This functions are called in a jupyter notebook to create a matrix for each and store them in a csv file. The functions are the following:
-  - select_group( )--> Automatize choosing between test or control group when doing feature extraction
-  - preprocess( )----> Call the functions that perform the feature extraction of one recording
-  - label( )-----------> Extract labels/target from questionnaries to append to dataframe
-  - flatten( )---------> Aditional function to flatten a list of list into a list (helpful in the creation of label)
+  - select_group( )--> Automatize choosing between test or control group when doing feature extraction.
+  - preprocess( )----> Call the functions that perform the feature extraction of one recording.
+  - label( )-----------> Extract labels/target from questionnaries to append to dataframe.
+  - flatten( )---------> Aditional function to flatten a list of list into a list (helpful in the creation of label).
 
-5. [notebook_feature_extraction.ipynb](notebook_feature_extraction.ipynb) --> Jupyter notebook where we can extract the features of both the test and control groups, verifying the dataframe and saving them to a csv
+5. [notebook_feature_extraction.ipynb](notebook_feature_extraction.ipynb) --> Jupyter notebook where we can extract the features of both the test and control groups, verifying the dataframe and saving them to a csv.
 
 6. regression_models.ipynb --> Jupyter Notebook were we call our matrix and perform several regression models and compare them to a dummy regressor to understand the performance of each. 
