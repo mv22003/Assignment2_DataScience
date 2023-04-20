@@ -12,19 +12,6 @@
 import pandas as pd
 import numpy as np
 import os
-
-# ------------------------------------------------------------------------
-# This function automatizes the selection of the participant group
-def select_group(grp):
-    if grp == 'test':
-        path = 'C:\\Users\\mverd\\Desktop\\IMD\\ESSEX\\TERM2\\Modules\\Data Science and Decision Making\\Assignment2_Final\\rawdata\\test\\'
-        groupSelect = 1
-    elif grp == 'control':
-        path = 'C:\\Users\\mverd\\Desktop\\IMD\\ESSEX\\TERM2\\Modules\\Data Science and Decision Making\\Assignment2_Final\\rawdata\\control\\'
-        groupSelect = 2
-    return path, groupSelect
-
-
 # ---------------------------------------------------------------------------
 def preprocess(path, file):
     # ------------------------------------------
@@ -134,10 +121,21 @@ def preprocess(path, file):
 
     return df_recordings
 #---------------------------------------------------------------------------------------------------
-## function that becomes helpful for the appending of the target in the df
+## Function that becomes helpful for the appending of the target in the df
 ## Transforms a list of list into a single list, the parameter is the list of lists
 def flatten(l):
     return [item for sublist in l for item in sublist]
+
+# ------------------------------------------------------------------------
+# This function automatizes the selection of the participant group
+def select_group(grp):
+    if grp == 'test':
+        path = 'C:\\Users\\mverd\\Desktop\\IMD\\ESSEX\\TERM2\\Modules\\Data Science and Decision Making\\Assignment2_Final\\rawdata\\test\\'
+        groupSelect = 1
+    elif grp == 'control':
+        path = 'C:\\Users\\mverd\\Desktop\\IMD\\ESSEX\\TERM2\\Modules\\Data Science and Decision Making\\Assignment2_Final\\rawdata\\control\\'
+        groupSelect = 2
+    return path, groupSelect
 
 #---------------------------------------------------------------------------------
 ## This function reads both of the questionnaries and creates the label for the 
