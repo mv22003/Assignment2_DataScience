@@ -19,5 +19,6 @@ This functions are called in a jupyter notebook to create a matrix for each and 
 
 5. [notebook_feature_extraction.ipynb](notebook_feature_extraction.ipynb) --> Jupyter notebook where we can extract the features of both the test and control groups, verifying the dataframe and saving them to a csv.
 
-6. models_control.ipynb --> Jupyter Notebook were we call our matrix and perform several regression models and compare them to a dummy regressor to understand the performance of each. 
-7. models_test.ipynb
+6. models_control.ipynb --> Jupyter Notebook were we call our matrix and perform several regression models to the control group data and compare them to a dummy regressor to understand the performance of each. There are more explanations about the process inside the .ipynb file. 
+
+7. models_test.ipynb ---->  Jupyter Notebook were we call our matrix and perform several regression models to the test group data and compare them to a dummy regressor to understand the performance of each. There are more explanations about the process inside the .ipynb file. 
