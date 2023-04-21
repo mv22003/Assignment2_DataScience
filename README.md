@@ -23,6 +23,6 @@ This functions are called in a jupyter notebook to create a matrix for each and 
 
 7. [models_test.ipynb](models_test.ipynb) ----->  Jupyter Notebook were we call our matrix and perform several regression models to the test group data and compare them to a dummy regressor to understand the performance of each. There are more explanations about the process inside the .ipynb file. 
 
-8. [rfe_models_control.ipynb](rfe_models_control.ipynb) ---> Jupyter Notebook that contains the Recursive Feature Elimination process using the best predictor from previous classificators for control group.
+8. [rfe_models_control.ipynb](rfe_models_control.ipynb) ---> Jupyter Notebook that contains the Recursive Feature Elimination (RFE) process using the best predictor from previous classificators for control group.
 
-9. [rfe_models_test.ipynb](rfe_models_test.ipynb) -------> Jupyter Notebook that contains the Recursive Feature Elimination process using the best predictor from previous classificators for test group.
+9. [rfe_models_test.ipynb](rfe_models_test.ipynb) -------> Jupyter Notebook that contains the Recursive Feature Elimination (RFE) process using the best predictor from previous classificators for test group.
