@@ -21,7 +21,7 @@ This functions are called in a jupyter notebook to create a matrix for each and 
 
 6. [models_control.ipynb](models_control.ipynb) --> Jupyter Notebook were we call our matrix and perform several regression models to the control group data and compare them to a dummy regressor to understand the performance of each. There are more explanations about the process inside the .ipynb file. 
 
-7. [models_test.ipynb](models_test.ipynb) ------>  Jupyter Notebook were we call our matrix and perform several regression models to the test group data and compare them to a dummy regressor to understand the performance of each. There are more explanations about the process inside the .ipynb file. 
+7. [models_test.ipynb](models_test.ipynb) ----->  Jupyter Notebook were we call our matrix and perform several regression models to the test group data and compare them to a dummy regressor to understand the performance of each. There are more explanations about the process inside the .ipynb file. 
 
 8. [rfe_models_control.ipynb](rfe_models_control.ipynb) ---> Jupyter Notebook that contains the Recursive Feature Elimination process using the best predictor from [models_control](models_control.ipynb).
 
