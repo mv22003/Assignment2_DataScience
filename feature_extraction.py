@@ -87,13 +87,29 @@ def preprocess(path, file):
         meanGazeY = group['Gaze point Y (MCSnorm)'].mean()
         stdGazeY  = group['Gaze point Y (MCSnorm)'].std()
 
+        # NEW FEATURES DIAMETER 5-10-2023   
+        pupL_min = group['Pupil diameter left'].min()
+        pupL_max = group['Pupil diameter left'].max()
+        pupR_min = group['Pupil diameter right'].min()
+        pupR_max = group['Pupil diameter right'].max()
+        
+        # NEW FEATURES SPEED AND ACC 5-10-2023   
+        # HOW TO DO SPEED AND ACCELERATION?
+        # WITH WHAT INFORMATION
+
+
+
         # Dictionary with features extracted
         feature_dict = {'Recording name'           : name,
                         'Participant name'         : partiName,
                         'Mean Pupil diameter left' : pupL_avg,
                         'Std Pupil diameter left'  : pupL_std,
+                        'Min Pupil diamater left'  : pupL_min,
+                        'Max Pupil diamater left'  : pupL_max,
                         'Mean Pupil diameter right': pupR_avg,
                         'Std Pupil diameter right' : pupR_std,
+                        'Min Pupil diamater right'  : pupR_min,
+                        'Max Pupil diamater right'  : pupR_max,
                         'Num. of Fixations'        : numFix,
                         'Num. of Saccades'         : numSac,
                         'Num. of Unclassified'     : numUnc,
