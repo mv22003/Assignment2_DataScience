@@ -142,30 +142,30 @@ if __name__ == "__main__":
     params_clfs = [
         ('dummyClassifier', {'clf': [DummyClassifier()], 'clf__strategy': Categorical(['prior'])}),
         ('randomForest', {'clf': [RandomForestClassifier()], 'clf__n_estimators': Integer(50, 300, prior='uniform')}),
-        ('decisionTree', {'clf': [DecisionTreeClassifier()], 'clf__criterion': Categorical(['entropy']),
-                          'clf__max_depth': Integer(1, 10, prior='uniform')}),
         ('adaboost', {'clf': [AdaBoostClassifier()], 'clf__n_estimators': Integer(50, 200, prior='uniform')}),
         ('LogisticRegression', {'clf': [LogisticRegression()], 'clf__C': Real(1e-5, 10, prior='log-uniform'),
                                 'clf__penalty': Categorical([None, 'l1', 'l2']),
                                 'clf__solver': Categorical(['saga'])}),
-        ('SVC_rbf', {'clf': [SVC()], 'clf__C': Real(1e-5, 1000, prior='uniform'), 'clf__kernel': ['rbf'],
-                     'clf__gamma': Real(0.0001, 0.9, prior='log-uniform')}),
         ('SVC_linear', {'clf': [SVC()], 'clf__C': Real(1e-5, 1000, prior='log-uniform'),
                         'clf__kernel': Categorical(['linear'])}),
-        ('XGBoost', {'clf': [XGBClassifier()], 'clf__max_depth': Integer(1, 20, prior='uniform'),
-                     'clf__reg_alpha': Real(0.0001, 10, prior='log-uniform'),
-                     'clf__reg_lambda': Real(0.01, 100, prior='log-uniform'),
-                     'clf__learning_rate': Real(5e-5, 0.05, prior='log-uniform')}),
-        ('sgd', {'clf': [SGDClassifier()]}),
-        ('kNeighbors', {'clf': [KNeighborsClassifier()], 'clf__n_neighbors': Integer(3, 10, prior='uniform')}),
-        ('nearestCentroid', {'clf': [NearestCentroid()]}),
-        ('LGBMClassifier', {'clf': [LGBMClassifier()], 'clf__learning_rate': Real(0.0005, 0.3, prior='log-uniform'),
+        ('SVC_rbf', {'clf': [SVC()], 'clf__C': Real(1e-5, 1000, prior='uniform'), 'clf__kernel': ['rbf'],
+                     'clf__gamma': Real(0.0001, 0.9, prior='log-uniform')}),
+        ('XGBoost', {'clf': [XGBClassifier()],
+                     'clf__max_depth': Integer(3, 15, prior='uniform'),
+                     'clf__n_estimators': Integer(100, 500, prior='uniform'),
+                     'clf__reg_alpha': Real(0.0001, 10, prior='log-uniform'),  # l1 reg
+                     'clf__reg_lambda': Real(0.01, 100, prior='log-uniform'),  # l2 reg
+                     'clf__learning_rate': Real(5e-4, 0.5, prior='log-uniform'),
+                     'clf__subsample': Real(0.3, 1, prior='uniform')}),
+        ('LGBMClassifier', {'clf': [LGBMClassifier()],
+                            'clf__learning_rate': Real(5e-4, 0.5, prior='log-uniform'),
                             'clf__subsample': Real(0.3, 1, prior='uniform'),
-                            'clf__n_estimators': Integer(500, 1000, prior='uniform'),
+                            'clf__n_estimators': Integer(100, 500, prior='uniform'),
                             'clf__max_depth': Integer(3, 15, prior='uniform'),
                             'clf__num_leaves': Integer(5, 40, prior='uniform'),
-                            'clf__reg_alpha': Real(0.0001, 10, prior='log-uniform'),
-                            'clf__reg_lambda': Real(0.01, 100, prior='log-uniform')})
+                            'clf__reg_alpha': Real(0.0001, 10, prior='log-uniform'),  # l1 reg
+                            'clf__reg_lambda': Real(0.01, 100, prior='log-uniform')  # l2 reg
+                            })
     ]
     for group in ['control', 'test', 'all']:
         _ = main(group, params_clfs)
