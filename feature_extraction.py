@@ -61,6 +61,8 @@ def preprocess(path, file):
     for feature in objColumns:
         df_features[feature] = df_features[feature].str.replace(',','.').astype(float)
 
+    # P
+
     # ------------------------------------------------
     #  Group by recording and extracting new features
     # -----------------------------------------------
@@ -93,9 +95,16 @@ def preprocess(path, file):
         pupR_min = group['Pupil diameter right'].min()
         pupR_max = group['Pupil diameter right'].max()
         
-        # NEW FEATURES SPEED AND ACC 5-10-2023   
-        # HOW TO DO SPEED AND ACCELERATION?
-        # WITH WHAT INFORMATION
+        # NEW FEATURES SPEED AND ACC 5-10-2023 (WITH GAZE POINT)
+        # speedX = group['Gaze point X (MCSnorm)']
+        # speedY = group['Gaze point Y (MCSnorm)']
+        # accelX = group
+        # accelY = group
+
+
+        # NEW FEATURES AVERAGE FIXATION SPEED
+
+       
 
 
 
@@ -122,7 +131,11 @@ def preprocess(path, file):
                         'Mean Gaze point X'        : meanGazeX,
                         'Std Gaze point X'         : stdGazeX,
                         'Mean Gaze point Y'        : meanGazeY,
-                        'Std Gaze point Y'         : stdGazeY,
+                        # 'Std Gaze point Y'         : stdGazeY,
+                        # 'Speed of Fixation X'      : speedX,
+                        # 'Speed of Fixation X'      : speedY,
+                        # 'Acceleration of Fixation X'      : accelX,
+                        # 'Acceleration of Fixation X'      : accelY,
                         'Empathy Score'            : 0}
 
 
