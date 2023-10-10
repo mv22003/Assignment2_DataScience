@@ -2,3 +2,5 @@
 /questionnaries/
 /rawdata/
 /data/
+/__pycache__/
+*.pyc
