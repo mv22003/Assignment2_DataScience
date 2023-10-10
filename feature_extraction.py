@@ -82,6 +82,13 @@ def preprocess(path, file):
     df_features['Speed'] = df_features['Distance'] / df_features['Delta Time']
     df_features['Acceleration'] = df_features['Speed'] / df_features['Delta Time']
 
+    # Create Average Fixation Speed Feature
+    # Manuel: MISSING!!! I could use some help :)
+    df_features['Fixation'] = df_features['Eye movement type'].replace(("EyesNotFound",np.nan), "Unclassified")
+    mapFixation = {'Fixation':1, 'Saccade':0, 'Unclassified':0, 'EyesNotFound':0}
+
+    df_features['Fixation'] = df_features['Fixation'].replace(mapFixation)
+
     # ------------------------------------------------
     #  Group by recording and extracting new features
     # -----------------------------------------------
@@ -148,6 +155,7 @@ def preprocess(path, file):
                         'Std Gaze point Y'         : stdGazeY,
                         'Speed'                    : speed,
                         'Acceleration'             : accel,
+                        # 'Avg Fixation Speed'       : avgFixSpeed,
                         'Empathy Score'            : 0}
 
 
