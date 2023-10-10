@@ -75,6 +75,13 @@ def preprocess(path, file):
     for feature in objColumns:
         df_features[feature] = df_features[feature].str.replace(',','.').astype(float)
 
+    # Create distance and time columns for SPEED and ACC
+    df_features['Time'] = pd.to_timedelta(df_features['Recording timestamp'], unit='us')
+    df_features['Delta Time'] = df_features['Time'].diff() / np.timedelta64(1, 'us')
+    df_features['Distance'] = np.sqrt(df_features['Gaze point X (MCSnorm)']**2 + df_features['Gaze point Y (MCSnorm)']**2)
+    df_features['Speed'] = df_features['Distance'] / df_features['Delta Time']
+    df_features['Acceleration'] = df_features['Speed'] / df_features['Delta Time']
+
     # ------------------------------------------------
     #  Group by recording and extracting new features
     # -----------------------------------------------
@@ -107,18 +114,13 @@ def preprocess(path, file):
         pupR_min = group['Pupil diameter right'].min()
         pupR_max = group['Pupil diameter right'].max()
         
-        # NEW FEATURES SPEED AND ACC 5-10-2023 (WITH GAZE POINT)
-        # speedX = group['Gaze point X (MCSnorm)']
-        # speedY = group['Gaze point Y (MCSnorm)']
-        # accelX = group
-        # accelY = group
-
+        # NEW FEATURES SPEED AND ACCELERATION
+        speed = group['Speed'].mean()
+        accel = group['Acceleration'].mean()
 
         # NEW FEATURES AVERAGE FIXATION SPEED
 
-       
-
-
+    
 
         # Dictionary with features extracted
         feature_dict = {'Recording name'           : name,
@@ -129,12 +131,12 @@ def preprocess(path, file):
                         'Max Pupil diamater left'  : pupL_max,
                         'Mean Pupil diameter right': pupR_avg,
                         'Std Pupil diameter right' : pupR_std,
-                        'Min Pupil diamater right'  : pupR_min,
-                        'Max Pupil diamater right'  : pupR_max,
+                        'Min Pupil diamater right' : pupR_min,
+                        'Max Pupil diamater right' : pupR_max,
                         'Num. of Fixations'        : numFix,
                         'Num. of Saccades'         : numSac,
                         'Num. of Unclassified'     : numUnc,
-                        'Recording duration (s)'   : (recDur/1000),
+                        'Recording duration (s)'      : (recDur/1000),
                         'Mean Gaze event duration (s)': (gazeAvg/1000),
                         'Mean Fixation point X'    : meanfixX,
                         'Std Fixation point X'     : stdFixX,
@@ -144,10 +146,8 @@ def preprocess(path, file):
                         'Std Gaze point X'         : stdGazeX,
                         'Mean Gaze point Y'        : meanGazeY,
                         'Std Gaze point Y'         : stdGazeY,
-                        # 'Speed of Fixation X'      : speedX,
-                        # 'Speed of Fixation X'      : speedY,
-                        # 'Acceleration of Fixation X'      : accelX,
-                        # 'Acceleration of Fixation X'      : accelY,
+                        'Speed'                    : speed,
+                        'Acceleration'             : accel,
                         'Empathy Score'            : 0}
 
 
