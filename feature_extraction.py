@@ -19,11 +19,25 @@ def preprocess(path, file):
     # ------------------------------------------
     # Read the .tsv file that contains the raw data of the participant
     df_table = pd.read_table(path + file,sep='\t',low_memory=False)
-    df = pd.DataFrame(df_table)
+    
+    # Remove calibration points in recording
+    startPoints = df_table[df_table['Event']=='ImageStimulusStart'].index.values.astype(int)
+    endPoints = df_table[df_table['Event']=='ImageStimulusEnd'].index.values.astype(int)
+    
+    # Store only image stimulus
+    df = pd.DataFrame()
+
+    for i in range(len(startPoints)):
+        start = startPoints[i]
+        end = endPoints[i]
+
+        trial = df_table.iloc[start:end+1]
+        df = pd.concat([df,trial])
 
     # Select correctly the participant in loop
     partiName = int(file[13:-4])
     print('Participant #',partiName)
+
 
     # Features we are keeping
     df_col = ['Recording timestamp','Participant name',
@@ -60,8 +74,6 @@ def preprocess(path, file):
     # Change (commas) to (decimals) and convert object to float64
     for feature in objColumns:
         df_features[feature] = df_features[feature].str.replace(',','.').astype(float)
-
-    # P
 
     # ------------------------------------------------
     #  Group by recording and extracting new features
@@ -131,7 +143,7 @@ def preprocess(path, file):
                         'Mean Gaze point X'        : meanGazeX,
                         'Std Gaze point X'         : stdGazeX,
                         'Mean Gaze point Y'        : meanGazeY,
-                        # 'Std Gaze point Y'         : stdGazeY,
+                        'Std Gaze point Y'         : stdGazeY,
                         # 'Speed of Fixation X'      : speedX,
                         # 'Speed of Fixation X'      : speedY,
                         # 'Acceleration of Fixation X'      : accelX,
@@ -175,18 +187,10 @@ def select_group(grp):
 def label(pathQ, groupSelect):
     # Read first and second questionnarie
     quest1 = pd.read_csv(pathQ + os.listdir(pathQ)[0], encoding= 'unicode_escape', low_memory=False)
-    quest2 = pd.read_csv(pathQ + os.listdir(pathQ)[1], encoding= 'unicode_escape', low_memory=False)
+    # quest2 = pd.read_csv(pathQ + os.listdir(pathQ)[1], encoding= 'unicode_escape', low_memory=False)
 
-    # Extract labels to predict
-    score_before_org = quest1.iloc[:,-2]
-    score_before_ext = quest1.iloc[:,-3]
-    score_after_org  = quest2.iloc[:,-2]
-    score_after_ext  = quest2.iloc[:,-3]  
-
-    # Label to predict
-    score_before = (score_before_org + score_before_ext)/2
-    score_after  = (score_after_org + score_after_ext)/2
-    score = (score_before + score_after)/2
+    # Extract labels to predict (Original Score, before experiment) 
+    score = quest1.iloc[:,-2]
 
     # Need to store the correct indexes (odd or even)
     if groupSelect == 1:
