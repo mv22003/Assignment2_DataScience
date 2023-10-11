@@ -60,6 +60,23 @@ def get_avg_fix_duration(df, group, srate=120):
     return len(durations), np.asarray(durations).mean()  # number of fixations and average duration across fixations
 
 
+def get_unclassified_count(df, group, srate=120):
+    temp = df[df['Recording name'] == group]
+    diff = temp['Eye_movement_type_Unclassified'].diff().values
+    # changes from 0-1 (i.e., diff = 1) indicate start of unclassified; changes from 1->0 (i.e. diff = -1) indicate end of unclassified
+    start_idx = np.where(diff == 1)[0]
+    end_idx = np.where(diff == -1)[0]
+    i = 0
+    while start_idx[0] > end_idx[i]:
+        # print(i, start_idx[0], end_idx[i])
+        i += 1
+    end_idx = end_idx[i:]
+    durations = []
+    for start, end in zip(start_idx, end_idx):
+        assert end > start
+        durations.append((end - start + 1) / srate)  # duration of fixation (number of rows/sampling rate)
+    return len(durations), np.asarray(durations).mean()  # number of fixations and average duration across fixations
+
 # ---------------------------------------------------------------------------
 def preprocess(path, fname):
     # ------------------------------------------
@@ -147,8 +164,10 @@ def preprocess(path, fname):
         recDur    = group['Recording duration'].unique().tolist()[0]
         gazeAvg   = group['Gaze event duration'].mean()
 
-        num_fixations, avg_fix_duration = get_avg_fix_duration(df, name, srate=120)
-        num_saccades, avg_sacc_speed = get_avg_sacc_speed(df, name)
+        num_fixations, avg_fix_duration = get_avg_fix_duration(df_features, name, srate=120)
+        num_saccades, avg_sacc_speed = get_avg_sacc_speed(df_features, name)
+
+        num_unclassified, avg_unclassified_duration = get_unclassified_count(df_features, name, srate=120)
 
         # Dictionary with features extracted
         feature_dict = {'Recording name'           : name,
@@ -163,7 +182,7 @@ def preprocess(path, fname):
                         'Max Pupil diamater right' : group['Pupil diameter right'].max(),
                         'Num. of Fixations'        : num_fixations,
                         'Num. of Saccades'         : num_saccades,
-                        'Num. of Unclassified'     : group['Eye_movement_type_Unclassified'].tolist().count(1),
+                        'Num. of Unclassified'     : num_unclassified,
                         'Recording duration (s)'      : (recDur/1000),
                         'Mean Gaze event duration (s)': (gazeAvg/1000),
                         'Mean Fixation point X'    : group['Fixation point X (MCSnorm)'].mean(),
@@ -178,6 +197,7 @@ def preprocess(path, fname):
                         'Acceleration'             : group['Acceleration'].mean(),
                         'Avg Saccade Speed'        : avg_sacc_speed,
                         'Avg Fix Duration'         : avg_fix_duration,
+                        'Avg Unclassif Duration'   : avg_unclassified_duration,
                         'Empathy Score'            : 0
                         }
 
