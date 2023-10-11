@@ -12,17 +12,65 @@
 import pandas as pd
 import numpy as np
 import os
+
+
 # ---------------------------------------------------------------------------
-def preprocess(path, file):
+def get_avg_sacc_speed(df, group):
+    '''
+    Return average saccade speed
+    '''
+    temp = df[df['Recording name'] == group]
+    diff = temp['Saccade'].diff().values
+    # changes from 0-1 (i.e., diff = 1) mean start of saccade; changes from 1->0 (i.e. diff = -1) mean end of saccade
+    start_idx = np.where(diff == 1)[0]
+    end_idx = np.where(diff == -1)[0]
+    i = 0
+    while start_idx[0] > end_idx[i]:
+        # print(i, start_idx[0], end_idx[i])
+        i += 1
+    end_idx = end_idx[i:]
+    speeds = []
+    for start, end in zip(start_idx, end_idx):
+        assert end > start
+        speeds.append(np.nanmean(temp['Speed'].iloc[start:end+1].values))  # average speed/saccade
+    return len(speeds), np.asarray(speeds).mean()  # number of saccades and average speed across saccades
+
+
+def get_avg_fix_duration(df, group, srate=120):
+    '''
+    Return average fixation duration
+    param df: Dataframe with original recording
+    param group: name of recording session
+    param srate: sampling rate of data (default in dataset is 120 Hz)
+    '''
+    temp = df[df['Recording name'] == group]
+    diff = temp['Fixation'].diff().values
+    # changes from 0-1 (i.e., diff = 1) indicate start of fixation; changes from 1->0 (i.e. diff = -1) indicate end of fixation
+    start_idx = np.where(diff == 1)[0]
+    end_idx = np.where(diff == -1)[0]
+    i = 0
+    while start_idx[0] > end_idx[i]:
+        # print(i, start_idx[0], end_idx[i])
+        i += 1
+    end_idx = end_idx[i:]
+    durations = []
+    for start, end in zip(start_idx, end_idx):
+        assert end > start
+        durations.append((end-start+1)/srate)  # duration of fixation (number of rows/sampling rate)
+    return len(durations), np.asarray(durations).mean()  # number of fixations and average duration across fixations
+
+
+# ---------------------------------------------------------------------------
+def preprocess(path, fname):
     # ------------------------------------------
     #               READING FILE
     # ------------------------------------------
     # Read the .tsv file that contains the raw data of the participant
-    df_table = pd.read_table(path + file,sep='\t',low_memory=False)
+    df_table = pd.read_table(path + fname, sep='\t', low_memory=False)
     
     # Remove calibration points in recording
-    startPoints = df_table[df_table['Event']=='ImageStimulusStart'].index.values.astype(int)
-    endPoints = df_table[df_table['Event']=='ImageStimulusEnd'].index.values.astype(int)
+    startPoints = df_table[df_table['Event'] == 'ImageStimulusStart'].index.values.astype(int)
+    endPoints = df_table[df_table['Event'] == 'ImageStimulusEnd'].index.values.astype(int)
     
     # Store only image stimulus
     df = pd.DataFrame()
@@ -30,24 +78,19 @@ def preprocess(path, file):
     for i in range(len(startPoints)):
         start = startPoints[i]
         end = endPoints[i]
-
         trial = df_table.iloc[start:end+1]
-        df = pd.concat([df,trial])
+        df = pd.concat([df, trial])
 
     # Select correctly the participant in loop
     partiName = int(file[13:-4])
-    print('Participant #',partiName)
+    print('Participant #', partiName)
 
 
     # Features we are keeping
-    df_col = ['Recording timestamp','Participant name',
-              'Recording name','Recording duration',
-              'Pupil diameter left','Pupil diameter right',
-              'Gaze point X (MCSnorm)','Gaze point Y (MCSnorm)',
-              'Eye movement type','Gaze event duration',
-              'Fixation point X (MCSnorm)','Fixation point Y (MCSnorm)']
-    
-    # Feature seletion base of data given and purpose of model
+    df_col = ['Recording timestamp', 'Participant name', 'Recording name', 'Recording duration',
+              'Pupil diameter left', 'Pupil diameter right', 'Gaze point X (MCSnorm)', 'Gaze point Y (MCSnorm)',
+              'Eye movement type', 'Gaze event duration', 'Fixation point X (MCSnorm)', 'Fixation point Y (MCSnorm)']
+    # Remove unnecessary columns
     df_features = df[df_col]
 
     # ------------------------------------------
@@ -61,33 +104,37 @@ def preprocess(path, file):
     # Change Participant name to integer
     prev = df_features['Participant name'].unique().tolist()
     part_name = int(df_features['Participant name'].unique().tolist()[-1][13:15])
+    # Check that we're saving the right participant name (one is from the filename, the other is from the file
+    assert part_name == partiName, "Participant numbers don't match! %d != %d" % (partiName, part_name)
     df_features['Participant name'] = df_features['Participant name'].replace(prev, part_name)
 
     # Label encoder for feature --> 'Eye movement type'
-    df_features['Eye movement type'] = df_features['Eye movement type'].replace(("EyesNotFound",np.nan), "Unclassified")
-    df_features = pd.get_dummies(df_features, prefix='Eye_movement_type',columns=['Eye movement type'])
+    df_features['Eye movement type'] = df_features['Eye movement type'].replace(("EyesNotFound", np.nan), "Unclassified")
+    df_features = pd.get_dummies(df_features, prefix='Eye_movement_type', columns=['Eye movement type'])
 
     # Columns that need to be changed from object to float
-    objColumns = ['Pupil diameter left','Pupil diameter right','Gaze point X (MCSnorm)',
-                  'Gaze point Y (MCSnorm)','Fixation point X (MCSnorm)','Fixation point Y (MCSnorm)']
-
+    objColumns = ['Pupil diameter left', 'Pupil diameter right', 'Gaze point X (MCSnorm)',
+                  'Gaze point Y (MCSnorm)', 'Fixation point X (MCSnorm)', 'Fixation point Y (MCSnorm)']
     # Change (commas) to (decimals) and convert object to float64
     for feature in objColumns:
-        df_features[feature] = df_features[feature].str.replace(',','.').astype(float)
+        df_features[feature] = df_features[feature].str.replace(',', '.').astype(float)
 
     # Create distance and time columns for SPEED and ACC
-    df_features['Time'] = pd.to_timedelta(df_features['Recording timestamp'], unit='us')
-    df_features['Delta Time'] = df_features['Time'].diff() / np.timedelta64(1, 'us')
-    df_features['Distance'] = np.sqrt(df_features['Gaze point X (MCSnorm)']**2 + df_features['Gaze point Y (MCSnorm)']**2)
-    df_features['Speed'] = df_features['Distance'] / df_features['Delta Time']
-    df_features['Acceleration'] = df_features['Speed'] / df_features['Delta Time']
+    #df_features['Time'] = pd.to_timedelta(df_features['Recording timestamp'], unit='us')
+    df_features['Time'] = pd.to_datetime(df_features['Recording timestamp']).astype(np.int64) / int(1e6)  # seconds
+    df_features['Delta Time'] = df_features['Time'].diff()
+    df_features['Position'] = np.sqrt(df_features['Gaze point X (MCSnorm)']**2 + df_features['Gaze point Y (MCSnorm)']**2)
+    df_features['Speed'] = df_features['Position'].diff() / df_features['Delta Time']
+    df_features['Acceleration'] = df_features['Speed'].diff() / df_features['Delta Time']
 
     # Create Average Fixation Speed Feature
     # Manuel: MISSING!!! I could use some help :)
-    df_features['Fixation'] = df_features['Eye movement type'].replace(("EyesNotFound",np.nan), "Unclassified")
-    mapFixation = {'Fixation':1, 'Saccade':0, 'Unclassified':0, 'EyesNotFound':0}
+    df_features['Fixation'] = df_features['Eye movement type'].replace(("EyesNotFound", np.nan), "Unclassified")
+    mapFixation = {'Fixation': 1, 'Saccade': 0, 'Unclassified': 0, 'EyesNotFound': 0}
 
     df_features['Fixation'] = df_features['Fixation'].replace(mapFixation)
+    df_features['Saccade'] = 0
+    df_features['Saccade'] = [1 for i in df_features['Eye movement type'].values if i == 'Saccade']
 
     # ------------------------------------------------
     #  Group by recording and extracting new features
@@ -97,66 +144,42 @@ def preprocess(path, file):
 
     for name, group in grouped_data:
         # Creation of features from big dataset
-        pupL_avg  = group['Pupil diameter left'].mean()
-        pupL_std  = group['Pupil diameter left'].std()
-        pupR_avg  = group['Pupil diameter right'].mean()
-        pupR_std  = group['Pupil diameter right'].std()
-        numFix    = group['Eye_movement_type_Fixation'].tolist().count(1)
-        numSac    = group['Eye_movement_type_Saccade'].tolist().count(1)
-        numUnc    = group['Eye_movement_type_Unclassified'].tolist().count(1)
         recDur    = group['Recording duration'].unique().tolist()[0]
         gazeAvg   = group['Gaze event duration'].mean()
-        meanfixX  = group['Fixation point X (MCSnorm)'].mean()
-        stdFixX   = group['Fixation point X (MCSnorm)'].std()
-        meanfixY  = group['Fixation point Y (MCSnorm)'].mean()
-        stdFixY   = group['Fixation point Y (MCSnorm)'].std()
-        meanGazeX = group['Gaze point X (MCSnorm)'].mean()
-        stdGazeX  = group['Gaze point X (MCSnorm)'].std()
-        meanGazeY = group['Gaze point Y (MCSnorm)'].mean()
-        stdGazeY  = group['Gaze point Y (MCSnorm)'].std()
 
-        # NEW FEATURES DIAMETER 5-10-2023   
-        pupL_min = group['Pupil diameter left'].min()
-        pupL_max = group['Pupil diameter left'].max()
-        pupR_min = group['Pupil diameter right'].min()
-        pupR_max = group['Pupil diameter right'].max()
-        
-        # NEW FEATURES SPEED AND ACCELERATION
-        speed = group['Speed'].mean()
-        accel = group['Acceleration'].mean()
-
-        # NEW FEATURES AVERAGE FIXATION SPEED
-
-    
+        num_fixations, avg_fix_duration = get_avg_fix_duration(df, name, srate=120)
+        num_saccades, avg_sacc_speed = get_avg_sacc_speed(df, name)
 
         # Dictionary with features extracted
         feature_dict = {'Recording name'           : name,
                         'Participant name'         : partiName,
-                        'Mean Pupil diameter left' : pupL_avg,
-                        'Std Pupil diameter left'  : pupL_std,
-                        'Min Pupil diamater left'  : pupL_min,
-                        'Max Pupil diamater left'  : pupL_max,
-                        'Mean Pupil diameter right': pupR_avg,
-                        'Std Pupil diameter right' : pupR_std,
-                        'Min Pupil diamater right' : pupR_min,
-                        'Max Pupil diamater right' : pupR_max,
-                        'Num. of Fixations'        : numFix,
-                        'Num. of Saccades'         : numSac,
-                        'Num. of Unclassified'     : numUnc,
+                        'Mean Pupil diameter left' : group['Pupil diameter left'].mean(),
+                        'Std Pupil diameter left'  : group['Pupil diameter left'].std(),
+                        'Min Pupil diamater left'  : group['Pupil diameter left'].min(),
+                        'Max Pupil diamater left'  : group['Pupil diameter left'].max(),
+                        'Mean Pupil diameter right': group['Pupil diameter right'].mean(),
+                        'Std Pupil diameter right' : group['Pupil diameter right'].std(),
+                        'Min Pupil diamater right' : group['Pupil diameter right'].min(),
+                        'Max Pupil diamater right' : group['Pupil diameter right'].max(),
+                        'Num. of Fixations'        : num_fixations,
+                        'Num. of Saccades'         : num_saccades,
+                        'Num. of Unclassified'     : group['Eye_movement_type_Unclassified'].tolist().count(1),
                         'Recording duration (s)'      : (recDur/1000),
                         'Mean Gaze event duration (s)': (gazeAvg/1000),
-                        'Mean Fixation point X'    : meanfixX,
-                        'Std Fixation point X'     : stdFixX,
-                        'Mean Fixation point Y'    : meanfixY,
-                        'Std Fixation point Y'     : stdFixY,
-                        'Mean Gaze point X'        : meanGazeX,
-                        'Std Gaze point X'         : stdGazeX,
-                        'Mean Gaze point Y'        : meanGazeY,
-                        'Std Gaze point Y'         : stdGazeY,
-                        'Speed'                    : speed,
-                        'Acceleration'             : accel,
-                        # 'Avg Fixation Speed'       : avgFixSpeed,
-                        'Empathy Score'            : 0}
+                        'Mean Fixation point X'    : group['Fixation point X (MCSnorm)'].mean(),
+                        'Std Fixation point X'     : group['Fixation point X (MCSnorm)'].std(),
+                        'Mean Fixation point Y'    : group['Fixation point Y (MCSnorm)'].mean(),
+                        'Std Fixation point Y'     : group['Fixation point Y (MCSnorm)'].std(),
+                        'Mean Gaze point X'        : group['Gaze point X (MCSnorm)'].mean(),
+                        'Std Gaze point X'         : group['Gaze point X (MCSnorm)'].std(),
+                        'Mean Gaze point Y'        : group['Gaze point Y (MCSnorm)'].mean(),
+                        'Std Gaze point Y'         : group['Gaze point Y (MCSnorm)'].std(),
+                        'Speed'                    : group['Speed'].mean(),
+                        'Acceleration'             : group['Acceleration'].mean(),
+                        'Avg Saccade Speed'        : avg_sacc_speed,
+                        'Avg Fix Duration'         : avg_fix_duration,
+                        'Empathy Score'            : 0
+                        }
 
 
         # Append the features for this recording name to the feature dataframe
