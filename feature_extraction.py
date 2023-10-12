@@ -4,7 +4,7 @@
 
 ## This function has two parameters
 ## 1. path --> this path should contain all the recording, either test or control
-## 2. file --> this is recommended to be given by a 'os.listdir' loop
+## 2. fname --> this is recommended to be given by a 'os.listdir' loop
 
 ## The output of this is a dataframe of size (n_recording, n_features)
 
@@ -62,7 +62,7 @@ def get_avg_fix_duration(df, group, srate=120):
 
 def get_unclassified_count(df, group, srate=120):
     temp = df[df['Recording name'] == group]
-    diff = temp['Eye_movement_type_Unclassified'].diff().values
+    diff = temp['Unclassified'].diff().values
     # changes from 0-1 (i.e., diff = 1) indicate start of unclassified; changes from 1->0 (i.e. diff = -1) indicate end of unclassified
     start_idx = np.where(diff == 1)[0]
     end_idx = np.where(diff == -1)[0]
@@ -99,14 +99,14 @@ def preprocess(path, fname):
         df = pd.concat([df, trial])
 
     # Select correctly the participant in loop
-    partiName = int(file[13:-4])
+    partiName = int(fname[13:-4])
     print('Participant #', partiName)
-
 
     # Features we are keeping
     df_col = ['Recording timestamp', 'Participant name', 'Recording name', 'Recording duration',
               'Pupil diameter left', 'Pupil diameter right', 'Gaze point X (MCSnorm)', 'Gaze point Y (MCSnorm)',
               'Eye movement type', 'Gaze event duration', 'Fixation point X (MCSnorm)', 'Fixation point Y (MCSnorm)']
+    
     # Remove unnecessary columns
     df_features = df[df_col]
 
@@ -121,17 +121,18 @@ def preprocess(path, fname):
     # Change Participant name to integer
     prev = df_features['Participant name'].unique().tolist()
     part_name = int(df_features['Participant name'].unique().tolist()[-1][13:15])
+
     # Check that we're saving the right participant name (one is from the filename, the other is from the file
     assert part_name == partiName, "Participant numbers don't match! %d != %d" % (partiName, part_name)
     df_features['Participant name'] = df_features['Participant name'].replace(prev, part_name)
 
-    # Label encoder for feature --> 'Eye movement type'
+    # # Label encoder for feature --> 'Eye movement type'
     df_features['Eye movement type'] = df_features['Eye movement type'].replace(("EyesNotFound", np.nan), "Unclassified")
-    df_features = pd.get_dummies(df_features, prefix='Eye_movement_type', columns=['Eye movement type'])
 
     # Columns that need to be changed from object to float
     objColumns = ['Pupil diameter left', 'Pupil diameter right', 'Gaze point X (MCSnorm)',
                   'Gaze point Y (MCSnorm)', 'Fixation point X (MCSnorm)', 'Fixation point Y (MCSnorm)']
+    
     # Change (commas) to (decimals) and convert object to float64
     for feature in objColumns:
         df_features[feature] = df_features[feature].str.replace(',', '.').astype(float)
@@ -145,13 +146,9 @@ def preprocess(path, fname):
     df_features['Acceleration'] = df_features['Speed'].diff() / df_features['Delta Time']
 
     # Create Average Fixation Speed Feature
-    # Manuel: MISSING!!! I could use some help :)
-    df_features['Fixation'] = df_features['Eye movement type'].replace(("EyesNotFound", np.nan), "Unclassified")
-    mapFixation = {'Fixation': 1, 'Saccade': 0, 'Unclassified': 0, 'EyesNotFound': 0}
-
-    df_features['Fixation'] = df_features['Fixation'].replace(mapFixation)
-    df_features['Saccade'] = 0
-    df_features['Saccade'] = [1 for i in df_features['Eye movement type'].values if i == 'Saccade']
+    df_features['Fixation'] = [1 if i == 'Fixation' else 0 for i in df_features['Eye movement type'].values]
+    df_features['Saccade'] = [1 if i == 'Saccade' else 0 for i in df_features['Eye movement type'].values]
+    df_features['Unclassified'] = [1 if i == 'Unclassified' else 0 for i in df_features['Eye movement type'].values]
 
     # ------------------------------------------------
     #  Group by recording and extracting new features
@@ -209,7 +206,7 @@ def preprocess(path, fname):
     df_recordings.set_index('Recording name', inplace=True)
 
     # If rows cointain nan values, we drop them because it means the recording was unsuccessful.
-    df_recordings = df_recordings.dropna(axis=0) 
+    # df_recordings = df_recordings.dropna(axis=0) 
 
     return df_recordings
 #---------------------------------------------------------------------------------------------------
