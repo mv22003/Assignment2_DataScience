@@ -33,7 +33,7 @@ def get_avg_sacc_speed(df, group):
     for start, end in zip(start_idx, end_idx):
         assert end > start
         speeds.append(np.nanmean(temp['Speed'].iloc[start:end+1].values))  # average speed/saccade
-    return len(speeds), np.asarray(speeds).mean()  # number of saccades and average speed across saccades
+    return len(speeds), np.nanmean(np.asarray(speeds))  # number of saccades and average speed across saccades
 
 
 def get_avg_fix_duration(df, group, srate=120):
@@ -237,7 +237,7 @@ def label(pathQ, groupSelect):
     quest1 = pd.read_csv(pathQ + os.listdir(pathQ)[0], encoding= 'unicode_escape', low_memory=False)
     # quest2 = pd.read_csv(pathQ + os.listdir(pathQ)[1], encoding= 'unicode_escape', low_memory=False)
 
-    # Extract labels to predict (Original Score, before experiment) 
+    # Extract labels to predict (Original Score, before experiment)
     score = quest1.iloc[:,-2]
 
     # Need to store the correct indexes (odd or even)
