@@ -1,0 +1,6 @@
+# Ignoring data in my local, files are to big for GitHub (even for LFS)
+/questionnaries/
+/rawdata/
+/data/
+/__pycache__/
+*.pyc
