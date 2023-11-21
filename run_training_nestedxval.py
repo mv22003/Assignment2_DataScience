@@ -76,8 +76,8 @@ def load_data(group):
 def main(group, estimators):
     df = load_data(group)
     # Split into train-test sets, using subject id to leave 10% of subjects out
-    lpgo = LeavePGroupsOut(n_groups=1)#6 if group == 'all' else 3)
-    inner_cv = LeavePGroupsOut(n_groups=3)
+    lpgo = LeavePGroupsOut(n_groups=1)  # leave-one-subject-out cross-validation
+    inner_cv = LeavePGroupsOut(n_groups=3)  # 10% of participants out
     # Number of possible splits:
     nsplits = lpgo.get_n_splits(groups=df['Participant name'])
     for name_clf, clf_params in estimators:
@@ -92,7 +92,7 @@ def main(group, estimators):
 
             n_features = x_crossval.shape[-1]
 
-            x_test = df.iloc[test_index, 1:-1].values
+            x_test = df.iloc[test_index, 1:-1].values  # one participant out
             y_test = df.iloc[test_index, -1].values
             param_grid = clf_params
             # Bayes Search with Cross-validation
@@ -103,7 +103,7 @@ def main(group, estimators):
                 param_grid['rfe__n_features_to_select'] = Integer(1, n_features, prior='uniform')
                 pipeline = Pipeline([('std', StandardScaler()), ('rfe', RFE(estimator=clf_params['clf'][0])),
                                      ('clf', clf_params['clf'])])
-            cv_clf = BayesSearchCV(pipeline, param_grid, n_iter=100, cv=inner_cv,
+            cv_clf = BayesSearchCV(pipeline, param_grid, n_iter=100, cv=inner_cv,  # 10% out
                                    scoring='balanced_accuracy',
                                    refit=True,  # it fits with the best estimator at the end
                                    n_jobs=effective_n_jobs(-1),
@@ -137,7 +137,7 @@ def main(group, estimators):
             # Note: print below is wrong!! (Not changing it because that's how the code was executed.)
             # Pickled results are ok, but logs are not
             print("\t\tCrossval test set results: {}+-{}".format(cv_results['crossval_val'][0],
-                                                            cv_results['crossval_val'][1]))
+                                                                 cv_results['crossval_val'][1]))
 
             cv_results_out.append(cv_results)
 
